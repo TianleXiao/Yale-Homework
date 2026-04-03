@@ -22,7 +22,7 @@
         h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 8px; }
         .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 40px; }
 
-        /* Stage 1: Selection Grid */
+        /* Subject Selection UI */
         #setup-stage { display: block; }
         .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 40px; }
         .checkbox-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s; }
@@ -30,7 +30,7 @@
         .checkbox-card input { margin-right: 12px; accent-color: var(--accent); width: 18px; height: 18px; }
         .checkbox-card label { cursor: pointer; font-size: 0.85rem; font-weight: 500; flex: 1; }
 
-        /* Stage 2: Assignment List */
+        /* Task List UI */
         #list-stage { display: none; }
         .task-card { border-bottom: 1px solid var(--border); padding: 20px 0; }
         .task-card:last-child { border-bottom: none; }
@@ -60,7 +60,7 @@
     <div id="list-stage">
         <header>
             <h1 id="list-title">Assignment Brief</h1>
-            <p class="subtitle" id="sync-status">Checking for updates...</p>
+            <p class="subtitle" id="sync-status">Syncing with GitHub...</p>
         </header>
 
         <div id="pdf-content">
@@ -75,45 +75,48 @@
 </div>
 
 <script>
-    /* ============================================================
-       DYNAMIC DATA CONFIGURATION
-       ============================================================ */
-    // 这里已经填入了你的 Gitee Raw 链接
+    /* Configuration: Point this to your GitHub Raw URL.
+       Note: Ensure 'refs/heads/main' is included for direct file access.
+    */
     const REMOTE_JSON_URL = "https://raw.githubusercontent.com/TianleXiao/Yale-Homework/refs/heads/main/tasks.json";
 
-    // 默认数据（防止加载失败）
-    let allTasks = [
-        { subject: "Math AA HL (Mr. Chris Ma's Class)", title: "P329, Question 4", due: "Checking..." }
-    ];
+    let allTasks = [];
 
+    // Master list of IB subjects offered in the class
     const masterSubjects = [
         "Chinese A HL", "Chinese A SL", "Math AA HL (Mr. Yu's Class)", 
         "Math AA HL (Mr. Chris Ma's Class)", "Math AA SL", "Math AI SL", 
         "Business Managment SL", "Business Managment HL", "English B SL", 
-        "Economics SL", "Economics HL", "Geography HL", "Physics HL", 
+        "Economics SL", "Economics HL", "Geography HL", "Geography SL", "Physics HL", 
         "Physics SL", "Chemistry SL", "Chemistry HL", "Vitual Art HL", 
-        "Computer Science SL", "Music HL", "Biology HL", "Biology SL","Geography SL",
+        "Computer Science SL", "Music HL", "Biology HL", "Biology SL"
     ];
 
-    // 从 Gitee 获取 JSON 作业数据
+    /**
+     * Fetches the latest task data from GitHub.
+     * Uses 'cache: no-store' to prevent browser from loading stale data.
+     */
     async function fetchTasks() {
         const statusEl = document.getElementById('sync-status');
         try {
-            // 添加随机后缀防止浏览器缓存旧数据
-            const response = await fetch(`${REMOTE_JSON_URL}?t=${new Date().getTime()}`);
+            const response = await fetch(REMOTE_JSON_URL, { cache: 'no-store' });
             if (!response.ok) throw new Error('Network Error');
             allTasks = await response.json();
-            statusEl.innerText = `Last Synced: ${new Date().toLocaleTimeString()}`;
+            
+            // Update UI to show sync success
+            statusEl.innerText = `Live Sync Active: ${new Date().toLocaleDateString()}`;
             statusEl.style.color = "green";
         } catch (e) {
-            statusEl.innerText = "Offline Mode: Using local cache.";
-            statusEl.style.color = "var(--muted)";
+            statusEl.innerText = "Offline Mode: Using cached data.";
+            statusEl.style.color = "orange";
         }
     }
 
-    // 初始化科目选择界面
+    /**
+     * Initializes the subject selection grid on page load.
+     */
     function initSetup() {
-        fetchTasks(); // 启动时自动同步
+        fetchTasks();
         const container = document.getElementById('subject-options');
         masterSubjects.sort().forEach(sub => {
             const div = document.createElement('div');
@@ -122,7 +125,7 @@
                 <input type="checkbox" id="chk-${sub}" value="${sub}">
                 <label for="chk-${sub}">${sub}</label>
             `;
-            // 点击卡片任意位置即可选中
+            // Allow clicking the whole card to toggle checkbox
             div.onclick = (e) => {
                 if(e.target.tagName !== 'INPUT') {
                     const chk = div.querySelector('input');
@@ -133,7 +136,9 @@
         });
     }
 
-    // 生成个性化作业清单
+    /**
+     * Filters tasks based on selected subjects and renders the list.
+     */
     function generateList() {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
         if(selected.length === 0) return alert("Please select at least one subject.");
@@ -143,7 +148,7 @@
         const filteredTasks = allTasks.filter(t => selected.includes(t.subject));
 
         if(filteredTasks.length === 0) {
-            container.innerHTML = `<p style="color:var(--muted); padding:40px; text-align:center;">No specific tasks logged for these subjects.</p>`;
+            container.innerHTML = `<p style="color:var(--muted); padding:40px; text-align:center;">No active tasks for selected subjects.</p>`;
         } else {
             filteredTasks.forEach(task => {
                 const div = document.createElement('div');
@@ -162,30 +167,35 @@
             });
         }
 
+        // Switch view from Setup to List
         document.getElementById('setup-stage').style.display = 'none';
         document.getElementById('list-stage').style.display = 'block';
         window.scrollTo(0,0);
     }
 
+    /**
+     * Resets the view to subject selection.
+     */
     function goBack() {
         document.getElementById('setup-stage').style.display = 'block';
         document.getElementById('list-stage').style.display = 'none';
     }
 
-    // 下载 PDF 功能
+    /**
+     * Generates and downloads a PDF of the current task list.
+     */
     function downloadPDF() {
         const element = document.getElementById('pdf-content');
         const opt = {
             margin: 15,
-            filename: `IB_Homework_Portal.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
+            filename: `IB_Homework_Schedule.pdf`,
             html2canvas: { scale: 3 },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).save();
     }
 
-    // 运行初始化
+    // Initialize application
     initSetup();
 </script>
 </body>
