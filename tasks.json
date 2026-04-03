@@ -7,6 +7,7 @@
   { "subject": "Physics HL", "title": "Finish all exercises assigned during class", "due": "TBD" },
   { "subject": "Chemistry HL", "title": "Complete the practice worksheets from class", "due": "TBD" },
   { "subject": "Chemistry HL", "title": "Chemistry IA First Draft (SUBMITTED / OVERDUE)", "due": "March 23 (passed)" },
+  { "subject": "Chemistry SL", "title": "TBD", "due": "TBD" },
   { "subject": "Chemistry SL", "title": "Chemistry IA First Draft (SUBMITTED / OVERDUE)", "due": "March 23 (passed)" },
   { "subject": "Math AA HL (Mr. Yu's Class)", "title": "Focus on IA completion + Independent practice problems", "due": "TBD" },
   { "subject": "Math AA HL (Mr. Yu's Class)", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "April 1 (Passed)" },
@@ -23,7 +24,6 @@
   { "subject": "Economics HL (Ms. Manjula's Class)", "title": "TBD", "due": "TBD" },
   { "subject": "Geography HL", "title": "TBD", "due": "TBD" },
   { "subject": "Physics SL", "title": "TBD", "due": "TBD" },
-  { "subject": "Chemistry SL", "title": "TBD", "due": "TBD" },
   { "subject": "Vitual Art HL", "title": "TBD", "due": "TBD" },
   { "subject": "Computer Science SL", "title": "TBD", "due": "TBD" },
   { "subject": "Music HL", "title": "TBD", "due": "TBD" }
