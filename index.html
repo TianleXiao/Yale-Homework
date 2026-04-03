@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IB DP Homework Portal | Class Rep</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text: #111827;
+            --muted: #6b7280;
+            --accent: #000000;
+            --border: #e5e7eb;
+            --card-bg: #f9fafb;
+            --urgent: #b91c1c;
+        }
+
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 700px; padding: 60px 20px; }
+        
+        h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 8px; }
+        .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 40px; }
+
+        /* Stage 1: Selection Grid */
+        #setup-stage { display: block; }
+        .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 40px; }
+        .checkbox-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s; }
+        .checkbox-card:hover { border-color: var(--accent); background: var(--card-bg); }
+        .checkbox-card input { margin-right: 12px; accent-color: var(--accent); width: 18px; height: 18px; }
+        .checkbox-card label { cursor: pointer; font-size: 0.85rem; font-weight: 500; flex: 1; }
+
+        /* Stage 2: Assignment List */
+        #list-stage { display: none; }
+        .task-card { border-bottom: 1px solid var(--border); padding: 20px 0; }
+        .task-card:last-child { border-bottom: none; }
+        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .subject-tag { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; background: #f3f4f6; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); }
+        .due-tag { font-size: 0.85rem; color: var(--urgent); font-weight: 700; }
+        .task-title { font-size: 1.1rem; font-weight: 500; display: flex; align-items: flex-start; gap: 12px; line-height: 1.4; }
+        
+        .btn { width: 100%; padding: 16px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 1rem; margin-bottom: 12px; }
+        .btn-black { background: var(--accent); color: white; }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--muted); }
+
+        .completed { opacity: 0.35; filter: grayscale(1); }
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div id="setup-stage">
+        <h1>Subject Configuration</h1>
+        <p class="subtitle">Select your subjects to generate the assignment checklist.</p>
+        <div id="subject-options" class="subject-grid"></div>
+        <button class="btn btn-black" onclick="generateList()">Generate Schedule</button>
+    </div>
+
+    <div id="list-stage">
+        <header>
+            <h1 id="list-title">Assignment Brief</h1>
+            <p class="subtitle" id="sync-status">Checking for updates...</p>
+        </header>
+
+        <div id="pdf-content">
+            <div id="task-container"></div>
+        </div>
+
+        <div class="no-print" style="margin-top: 40px;">
+            <button class="btn btn-black" onclick="downloadPDF()">Download as PDF</button>
+            <button class="btn btn-outline" onclick="goBack()">Edit Subject Selection</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ============================================================
+       DYNAMIC DATA CONFIGURATION
+       ============================================================ */
+    // 这里已经填入了你的 Gitee Raw 链接
+    const REMOTE_JSON_URL = "https://gitee.com/TianleXiao/Yale-homework/raw/master/tasks.json";
+
+    // 默认数据（防止加载失败）
+    let allTasks = [
+        { subject: "Math AA HL (Mr. Chris Ma's Class)", title: "P329, Question 4", due: "Checking..." }
+    ];
+
+    const masterSubjects = [
+        "Chinese A HL", "Chinese A SL", "Math AA HL (Mr. Yu's Class)", 
+        "Math AA HL (Mr. Chris Ma's Class)", "Math AA SL", "Math AI SL", 
+        "Business Managment SL", "Business Managment HL", "English B SL", 
+        "Economics SL", "Economics HL", "Geography HL", "Physics HL", 
+        "Physics SL", "Chemistry SL", "Chemistry HL", "Vitual Art HL", 
+        "Computer Science SL", "Music HL", "Biology HL", "Biology SL"
+    ];
+
+    // 从 Gitee 获取 JSON 作业数据
+    async function fetchTasks() {
+        const statusEl = document.getElementById('sync-status');
+        try {
+            // 添加随机后缀防止浏览器缓存旧数据
+            const response = await fetch(`${REMOTE_JSON_URL}?t=${new Date().getTime()}`);
+            if (!response.ok) throw new Error('Network Error');
+            allTasks = await response.json();
+            statusEl.innerText = `Last Synced: ${new Date().toLocaleTimeString()}`;
+            statusEl.style.color = "green";
+        } catch (e) {
+            statusEl.innerText = "Offline Mode: Using local cache.";
+            statusEl.style.color = "var(--muted)";
+        }
+    }
+
+    // 初始化科目选择界面
+    function initSetup() {
+        fetchTasks(); // 启动时自动同步
+        const container = document.getElementById('subject-options');
+        masterSubjects.sort().forEach(sub => {
+            const div = document.createElement('div');
+            div.className = 'checkbox-card';
+            div.innerHTML = `
+                <input type="checkbox" id="chk-${sub}" value="${sub}">
+                <label for="chk-${sub}">${sub}</label>
+            `;
+            // 点击卡片任意位置即可选中
+            div.onclick = (e) => {
+                if(e.target.tagName !== 'INPUT') {
+                    const chk = div.querySelector('input');
+                    chk.checked = !chk.checked;
+                }
+            };
+            container.appendChild(div);
+        });
+    }
+
+    // 生成个性化作业清单
+    function generateList() {
+        const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
+        if(selected.length === 0) return alert("Please select at least one subject.");
+
+        const container = document.getElementById('task-container');
+        container.innerHTML = '';
+        const filteredTasks = allTasks.filter(t => selected.includes(t.subject));
+
+        if(filteredTasks.length === 0) {
+            container.innerHTML = `<p style="color:var(--muted); padding:40px; text-align:center;">No specific tasks logged for these subjects.</p>`;
+        } else {
+            filteredTasks.forEach(task => {
+                const div = document.createElement('div');
+                div.className = 'task-card';
+                div.innerHTML = `
+                    <div class="task-header">
+                        <span class="subject-tag">${task.subject}</span>
+                        <span class="due-tag">Due: ${task.due}</span>
+                    </div>
+                    <label class="task-title">
+                        <input type="checkbox" onclick="this.parentElement.parentElement.classList.toggle('completed')">
+                        ${task.title}
+                    </label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        document.getElementById('setup-stage').style.display = 'none';
+        document.getElementById('list-stage').style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    function goBack() {
+        document.getElementById('setup-stage').style.display = 'block';
+        document.getElementById('list-stage').style.display = 'none';
+    }
+
+    // 下载 PDF 功能
+    function downloadPDF() {
+        const element = document.getElementById('pdf-content');
+        const opt = {
+            margin: 15,
+            filename: `IB_Homework_Portal.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 3 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    // 运行初始化
+    initSetup();
+</script>
+</body>
+</html>
