@@ -1,8 +1,27 @@
 [
-  { "subject": "Math AA HL (Mr. Chris Ma's Class)", "title": "P329, Question 4", "due": "TBD" },
-  { "subject": "Math AA HL (Mr. Chris Ma's Class)", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "Apr 1" },
-  { "subject": "Math AA HL (Mr. Yu's Class)", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "Apr 1" },
-  { "subject": "Chinese A HL", "title": "完成 Paper 2 论文内容", "due": "Apr 5" },
-  { "subject": "English B SL", "title": "Review Paper 1 Interview (Mr. Romano)", "due": "Apr 7" }
-  { "subject": "Economics HL", "title": "Workbook - Economic Growth", "due": "TBD" }
+  { "subject": "Chinese A HL", "title": "完成 Paper 2 论文内容", "due": "Apr 5 (Sunday)" },
+  { "subject": "Chinese A HL", "title": "完成 HL Essay 写作任务", "due": "TBD" },
+  { "subject": "Chinese A SL", "title": "完成 Paper 2 论文内容", "due": "Apr 5 (Sunday)" },
+  { "subject": "English B SL", "title": "Complete worksheet & Review Paper 1 Interview (Mr. Romano)", "due": "Apr 7 (Tuesday)" },
+  { "subject": "Biology HL", "title": "D1.2 Protein Synthesis Worksheet", "due": "TBD" },
+  { "subject": "Physics HL", "title": "Finish all exercises assigned during class", "due": "TBD" },
+  { "subject": "Chemistry HL", "title": "Complete the practice worksheets from class", "due": "TBD" },
+  { "subject": "Math AA HL (Mr. Yu's Class)", "title": "Focus on IA completion + Independent practice problems", "due": "TBD" },
+  { "subject": "Math AA HL (Mr. Yu's Class)", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "Apr 1 (Passed)" },
+  { "subject": "Math AA HL (Mr. Chris Ma's Class)", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "Apr 1 (Passed)" },
+  { "subject": "Math AA HL (Mr. Chris Ma's Class)", "title": "P 329, Question 4", "due": "TBD" },
+  { "subject": "Math AA SL", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "Apr 1 (Passed)" },
+  { "subject": "Math AI SL", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "Apr 1 (Passed)" },
+  { "subject": "Geography SL", "title": "TBD", "due": "TBD" },
+  { "subject": "Biology SL", "title": "TBD", "due": "TBD" },
+  { "subject": "Business Managment SL", "title": "TBD", "due": "TBD" },
+  { "subject": "Business Managment HL", "title": "TBD", "due": "TBD" },
+  { "subject": "Economics SL", "title": "TBD", "due": "TBD" },
+  { "subject": "Economics HL", "title": "TBD", "due": "TBD" },
+  { "subject": "Geography HL", "title": "TBD", "due": "TBD" },
+  { "subject": "Physics SL", "title": "TBD", "due": "TBD" },
+  { "subject": "Chemistry SL", "title": "TBD", "due": "TBD" },
+  { "subject": "Vitual Art HL", "title": "TBD", "due": "TBD" },
+  { "subject": "Computer Science SL", "title": "TBD", "due": "TBD" },
+  { "subject": "Music HL", "title": "TBD", "due": "TBD" }
 ]
