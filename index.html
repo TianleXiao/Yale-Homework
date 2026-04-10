@@ -77,6 +77,7 @@
     const REMOTE_JSON_URL = "https://raw.githubusercontent.com/TianleXiao/Yale-Homework/refs/heads/main/tasks.json";
     let allTasks = [];
 
+    // Master list updated with Chinese TOK and English TOK
     const masterSubjects = [
         "Chinese A HL", "Chinese A SL", "Math AA HL (Mr. Yu's Class)", 
         "Math AA HL (Mr. Kris Ma's Class)", "Math AA HL (Ms. Li's Class)","Math AA SL", "Math AI SL", 
@@ -89,14 +90,16 @@
     ];
 
     /**
-     * Clean string by removing extra whitespace and converting to lowercase for robust matching
+     * Helper to clean strings for comparison (removes spaces and makes lowercase)
+     * This ensures robust matching between HTML and JSON subjects.
      */
     function normalize(str) {
         return str ? str.replace(/\s+/g, '').toLowerCase() : "";
     }
 
     /**
-     * Fetch latest tasks from GitHub with cache-busting timestamp
+     * Fetch latest tasks from remote GitHub JSON.
+     * Cache-busting is used to ensure fresh data.
      */
     async function fetchTasks() {
         const statusEl = document.getElementById('sync-status');
@@ -108,7 +111,7 @@
             statusEl.innerText = `Live Sync Active: ${new Date().toLocaleDateString()}`;
             statusEl.style.color = "green";
 
-            // If user has saved preferences, auto-load the list
+            // If user has saved preferences, auto-generate the list
             const saved = JSON.parse(localStorage.getItem('yale_selected_subjects') || "[]");
             if(saved.length > 0) {
                 generateList(true); 
@@ -120,13 +123,13 @@
     }
 
     /**
-     * Build the subject checkbox UI
+     * Build the subject selection grid using masterSubjects array.
      */
     function initSetup() {
         const container = document.getElementById('subject-options');
         const savedSubjects = JSON.parse(localStorage.getItem('yale_selected_subjects') || "[]");
 
-        // Remove duplicates and sort alphabetically
+        // Unique sorting to prevent duplicate checkboxes (e.g., typos in master list)
         [...new Set(masterSubjects)].sort().forEach(sub => {
             const isChecked = savedSubjects.includes(sub) ? 'checked' : '';
             const div = document.createElement('div');
@@ -149,7 +152,7 @@
     }
 
     /**
-     * Save current selection to browser memory
+     * Save currently selected subjects to localStorage.
      */
     function saveSelection() {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
@@ -157,7 +160,7 @@
     }
 
     /**
-     * Filter tasks based on selection and render the list
+     * Generate the filtered task list based on selected subjects.
      */
     function generateList(isAuto = false) {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
@@ -172,9 +175,10 @@
         const container = document.getElementById('task-container');
         container.innerHTML = '';
 
+        // Normalize selected subjects for reliable comparison
         const normalizedSelected = selected.map(s => normalize(s));
 
-        // Matching logic: uses the normalized subject name
+        // Filter allTasks from JSON against normalized selection
         const filteredTasks = allTasks.filter(task => {
             return normalizedSelected.includes(normalize(task.subject));
         });
@@ -199,12 +203,13 @@
             });
         }
 
+        // Switch Stage
         document.getElementById('setup-stage').style.display = 'none';
         document.getElementById('list-stage').style.display = 'block';
     }
 
     /**
-     * Reset view to configuration stage
+     * Return to the configuration screen.
      */
     function goBack() {
         document.getElementById('setup-stage').style.display = 'block';
@@ -212,7 +217,7 @@
     }
 
     /**
-     * Generate PDF of the current view
+     * Download the current list view as a high-quality PDF.
      */
     function downloadPDF() {
         const element = document.getElementById('pdf-content');
@@ -225,7 +230,7 @@
         html2pdf().set(opt).from(element).save();
     }
 
-    // Initialize application
+    // Startup
     initSetup();
 </script>
 </body>
