@@ -23,15 +23,13 @@
         h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 8px; }
         .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 40px; }
 
-        /* Subject Selection UI */
-        #setup-stage { display: block; }
         .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 40px; }
         .checkbox-card { border: 1px solid var(--border); border-radius: 12px; padding: 14px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s; }
         .checkbox-card:hover { border-color: var(--accent); background: var(--card-bg); }
         .checkbox-card input { margin-right: 12px; accent-color: var(--accent); width: 18px; height: 18px; }
         .checkbox-card label { cursor: pointer; font-size: 0.85rem; font-weight: 500; flex: 1; }
 
-        /* Task List UI */
+        #setup-stage { display: block; }
         #list-stage { display: none; }
         .task-card { border-bottom: 1px solid var(--border); padding: 20px 0; }
         .task-card:last-child { border-bottom: none; }
@@ -76,14 +74,9 @@
 </div>
 
 <script>
-    /* Configuration: Point this to your GitHub Raw URL.
-       Note: Ensure 'refs/heads/main' is included for direct file access.
-    */
     const REMOTE_JSON_URL = "https://raw.githubusercontent.com/TianleXiao/Yale-Homework/refs/heads/main/tasks.json";
-
     let allTasks = [];
 
-    // Master list of IB subjects offered in the class
     const masterSubjects = [
         "Chinese A HL", "Chinese A SL", "Math AA HL (Mr. Yu's Class)", 
         "Math AA HL (Mr. Kris Ma's Class)", "Math AA HL (Ms. Li's Class)","Math AA SL", "Math AI SL", 
@@ -95,8 +88,7 @@
     ];
 
     /**
-     * Fetches the latest task data from GitHub.
-     * Uses 'cache: no-store' to prevent browser from loading stale data.
+     * Fetch latest tasks from remote JSON source
      */
     async function fetchTasks() {
         const statusEl = document.getElementById('sync-status');
@@ -105,9 +97,14 @@
             if (!response.ok) throw new Error('Network Error');
             allTasks = await response.json();
             
-            // Update UI to show sync success
             statusEl.innerText = `Live Sync Active: ${new Date().toLocaleDateString()}`;
             statusEl.style.color = "green";
+
+            // Auto-load list if user has saved preferences
+            const saved = JSON.parse(localStorage.getItem('yale_selected_subjects') || "[]");
+            if(saved.length > 0) {
+                generateList(true); 
+            }
         } catch (e) {
             statusEl.innerText = "Offline Mode: Using cached data.";
             statusEl.style.color = "orange";
@@ -115,35 +112,56 @@
     }
 
     /**
-     * Initializes the subject selection grid on page load.
+     * Initialize UI and restore selections from LocalStorage
      */
     function initSetup() {
-        fetchTasks();
         const container = document.getElementById('subject-options');
+        const savedSubjects = JSON.parse(localStorage.getItem('yale_selected_subjects') || "[]");
+
         masterSubjects.sort().forEach(sub => {
+            const isChecked = savedSubjects.includes(sub) ? 'checked' : '';
             const div = document.createElement('div');
             div.className = 'checkbox-card';
             div.innerHTML = `
-                <input type="checkbox" id="chk-${sub}" value="${sub}">
+                <input type="checkbox" id="chk-${sub}" value="${sub}" ${isChecked}>
                 <label for="chk-${sub}">${sub}</label>
             `;
-            // Allow clicking the whole card to toggle checkbox
+            
+            // Handle card clicks for better UX
             div.onclick = (e) => {
                 if(e.target.tagName !== 'INPUT') {
                     const chk = div.querySelector('input');
                     chk.checked = !chk.checked;
                 }
+                saveSelection();
             };
             container.appendChild(div);
         });
+        fetchTasks();
     }
 
     /**
-     * Filters tasks based on selected subjects and renders the list.
+     * Save currently checked subjects to browser LocalStorage
      */
-    function generateList() {
+    function saveSelection() {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
-        if(selected.length === 0) return alert("Please select at least one subject.");
+        localStorage.setItem('yale_selected_subjects', JSON.stringify(selected));
+    }
+
+    /**
+     * Filter tasks based on selection and render the task list view
+     * @param {boolean} isAuto - If true, skips alerts for empty selections
+     */
+    function generateList(isAuto = false) {
+        const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
+        
+        if(selected.length === 0) {
+            if(!isAuto) alert("Please select at least one subject.");
+            return;
+        }
+
+        // Persist selection before switching views
+        saveSelection();
 
         const container = document.getElementById('task-container');
         container.innerHTML = '';
@@ -169,14 +187,13 @@
             });
         }
 
-        // Switch view from Setup to List
+        // Switch stages
         document.getElementById('setup-stage').style.display = 'none';
         document.getElementById('list-stage').style.display = 'block';
-        window.scrollTo(0,0);
     }
 
     /**
-     * Resets the view to subject selection.
+     * Navigate back to subject selection screen
      */
     function goBack() {
         document.getElementById('setup-stage').style.display = 'block';
@@ -184,7 +201,7 @@
     }
 
     /**
-     * Generates and downloads a PDF of the current task list.
+     * Use html2pdf to export the assignment list
      */
     function downloadPDF() {
         const element = document.getElementById('pdf-content');
@@ -197,7 +214,7 @@
         html2pdf().set(opt).from(element).save();
     }
 
-    // Initialize application
+    // Start Application
     initSetup();
 </script>
 </body>
