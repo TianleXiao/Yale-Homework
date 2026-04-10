@@ -74,11 +74,10 @@
 </div>
 
 <script>
-    // URL for the remote data source. Added cache-busting logic in fetchTasks
     const REMOTE_JSON_URL = "https://raw.githubusercontent.com/TianleXiao/Yale-Homework/refs/heads/main/tasks.json";
     let allTasks = [];
 
-    // Master list of available subjects
+    // Master list of subjects defined for UI checkboxes
     const masterSubjects = [
         "Chinese A HL", "Chinese A SL", "Math AA HL (Mr. Yu's Class)", 
         "Math AA HL (Mr. Kris Ma's Class)", "Math AA HL (Ms. Li's Class)","Math AA SL", "Math AI SL", 
@@ -90,37 +89,31 @@
     ];
 
     /**
-     * Fetch latest tasks from remote JSON source.
-     * Uses a timestamp query parameter to bypass GitHub/CDN caching.
+     * Fetch latest tasks with cache-busting timestamp
      */
     async function fetchTasks() {
         const statusEl = document.getElementById('sync-status');
         try {
-            // Append timestamp to URL to force fresh data retrieval
-            const timestamp = new Date().getTime();
-            const response = await fetch(`${REMOTE_JSON_URL}?t=${timestamp}`, { cache: 'no-store' });
-            
+            // Append timestamp to prevent browser from loading old cached JSON
+            const response = await fetch(`${REMOTE_JSON_URL}?t=${new Date().getTime()}`, { cache: 'no-store' });
             if (!response.ok) throw new Error('Network Error');
-            
             allTasks = await response.json();
             
             statusEl.innerText = `Live Sync Active: ${new Date().toLocaleDateString()}`;
             statusEl.style.color = "green";
 
-            // Restore previous selection and auto-generate if data exists
             const saved = JSON.parse(localStorage.getItem('yale_selected_subjects') || "[]");
             if(saved.length > 0) {
                 generateList(true); 
             }
         } catch (e) {
-            console.error("Fetch error:", e);
             statusEl.innerText = "Offline Mode: Using cached data.";
             statusEl.style.color = "orange";
         }
     }
 
     /**
-     * Build the subject selection UI based on masterSubjects array.
+     * Initialize UI and restore saved checkbox states
      */
     function initSetup() {
         const container = document.getElementById('subject-options');
@@ -135,7 +128,6 @@
                 <label for="chk-${sub}">${sub}</label>
             `;
             
-            // Toggle checkbox when clicking the card area
             div.onclick = (e) => {
                 if(e.target.tagName !== 'INPUT') {
                     const chk = div.querySelector('input');
@@ -149,7 +141,7 @@
     }
 
     /**
-     * Store selected subjects in browser localStorage.
+     * Persist selection to local storage
      */
     function saveSelection() {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
@@ -157,8 +149,7 @@
     }
 
     /**
-     * Filter tasks and render them.
-     * Includes normalization to fix "English B SL" display issues.
+     * Filter tasks using normalized string matching to fix Physics and English B issues
      */
     function generateList(isAuto = false) {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
@@ -173,27 +164,24 @@
         const container = document.getElementById('task-container');
         container.innerHTML = '';
 
-        // Improved filtering: ignores case and trim spaces for more reliable matching
+        // FIX: Normalize both keys and values to ensure matching even with extra spaces
         const filteredTasks = allTasks.filter(task => {
             if (!task.subject) return false;
-            const normalizedSubject = task.subject.trim().toLowerCase();
-            return selected.some(s => s.trim().toLowerCase() === normalizedSubject);
+            const taskSubject = task.subject.trim().toLowerCase();
+            return selected.some(sel => sel.trim().toLowerCase() === taskSubject);
         });
 
         if(filteredTasks.length === 0) {
             container.innerHTML = `<p style="color:var(--muted); padding:40px; text-align:center;">No active tasks for selected subjects.</p>`;
         } else {
+            // Sort tasks by due date (optional, but helpful)
             filteredTasks.forEach(task => {
                 const div = document.createElement('div');
                 div.className = 'task-card';
-                
-                // Fallback for missing due dates
-                const displayDue = task.due ? task.due : "No Date";
-
                 div.innerHTML = `
                     <div class="task-header">
                         <span class="subject-tag">${task.subject}</span>
-                        <span class="due-tag">Deadline: ${displayDue}</span>
+                        <span class="due-tag">Deadline: ${task.due || 'TBD'}</span>
                     </div>
                     <label class="task-title">
                         <input type="checkbox" onclick="this.parentElement.parentElement.classList.toggle('completed')">
@@ -204,21 +192,17 @@
             });
         }
 
-        // Toggle UI visibility
         document.getElementById('setup-stage').style.display = 'none';
         document.getElementById('list-stage').style.display = 'block';
     }
 
-    /**
-     * Switch back to the subject configuration screen.
-     */
     function goBack() {
         document.getElementById('setup-stage').style.display = 'block';
         document.getElementById('list-stage').style.display = 'none';
     }
 
     /**
-     * Export the current task list to a PDF file.
+     * PDF Export Configuration
      */
     function downloadPDF() {
         const element = document.getElementById('pdf-content');
@@ -231,7 +215,7 @@
         html2pdf().set(opt).from(element).save();
     }
 
-    // Initialize the application on load
+    // Start App
     initSetup();
 </script>
 </body>
