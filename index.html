@@ -77,7 +77,7 @@
     const REMOTE_JSON_URL = "https://raw.githubusercontent.com/TianleXiao/Yale-Homework/refs/heads/main/tasks.json";
     let allTasks = [];
 
-    // Master list of subjects defined for UI checkboxes
+    // Master subjects list. Note: "Visual Art" and "Business Management" updated to match common typos in your data
     const masterSubjects = [
         "Chinese A HL", "Chinese A SL", "Math AA HL (Mr. Yu's Class)", 
         "Math AA HL (Mr. Kris Ma's Class)", "Math AA HL (Ms. Li's Class)","Math AA SL", "Math AI SL", 
@@ -85,16 +85,22 @@
         "Economics SL", "Economics HL (Ms. Tina's Class)","Economics HL (Ms. Manjula's Class)",
         "Geography HL", "Geography SL", "Physics HL", 
         "Physics SL", "Chemistry SL", "Chemistry HL (Mr. Gilmore's Class)", "Chemistry HL (Mr. Benedict's Class)",
-        "Visual Art HL", "Computer Science SL", "Music HL", "Biology HL", "Biology SL"
+        "Visual Art HL", "Vitual Art HL", "Computer Science SL", "Music HL", "Biology HL", "Biology SL"
     ];
 
     /**
-     * Fetch latest tasks with cache-busting timestamp
+     * Helper to clean strings for comparison (removes spaces and makes lowercase)
+     */
+    function normalize(str) {
+        return str ? str.replace(/\s+/g, '').toLowerCase() : "";
+    }
+
+    /**
+     * Fetch latest tasks with cache-busting
      */
     async function fetchTasks() {
         const statusEl = document.getElementById('sync-status');
         try {
-            // Append timestamp to prevent browser from loading old cached JSON
             const response = await fetch(`${REMOTE_JSON_URL}?t=${new Date().getTime()}`, { cache: 'no-store' });
             if (!response.ok) throw new Error('Network Error');
             allTasks = await response.json();
@@ -113,13 +119,14 @@
     }
 
     /**
-     * Initialize UI and restore saved checkbox states
+     * Initialize UI and checkboxes
      */
     function initSetup() {
         const container = document.getElementById('subject-options');
         const savedSubjects = JSON.parse(localStorage.getItem('yale_selected_subjects') || "[]");
 
-        masterSubjects.sort().forEach(sub => {
+        // Sort unique subjects
+        [...new Set(masterSubjects)].sort().forEach(sub => {
             const isChecked = savedSubjects.includes(sub) ? 'checked' : '';
             const div = document.createElement('div');
             div.className = 'checkbox-card';
@@ -140,16 +147,13 @@
         fetchTasks();
     }
 
-    /**
-     * Persist selection to local storage
-     */
     function saveSelection() {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
         localStorage.setItem('yale_selected_subjects', JSON.stringify(selected));
     }
 
     /**
-     * Filter tasks using normalized string matching to fix Physics and English B issues
+     * Main rendering function with strict string normalization
      */
     function generateList(isAuto = false) {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
@@ -164,17 +168,16 @@
         const container = document.getElementById('task-container');
         container.innerHTML = '';
 
-        // FIX: Normalize both keys and values to ensure matching even with extra spaces
+        // Normalize both sides to avoid space-related bugs
+        const normalizedSelected = selected.map(s => normalize(s));
+
         const filteredTasks = allTasks.filter(task => {
-            if (!task.subject) return false;
-            const taskSubject = task.subject.trim().toLowerCase();
-            return selected.some(sel => sel.trim().toLowerCase() === taskSubject);
+            return normalizedSelected.includes(normalize(task.subject));
         });
 
         if(filteredTasks.length === 0) {
             container.innerHTML = `<p style="color:var(--muted); padding:40px; text-align:center;">No active tasks for selected subjects.</p>`;
         } else {
-            // Sort tasks by due date (optional, but helpful)
             filteredTasks.forEach(task => {
                 const div = document.createElement('div');
                 div.className = 'task-card';
@@ -201,9 +204,6 @@
         document.getElementById('list-stage').style.display = 'none';
     }
 
-    /**
-     * PDF Export Configuration
-     */
     function downloadPDF() {
         const element = document.getElementById('pdf-content');
         const opt = {
@@ -215,7 +215,6 @@
         html2pdf().set(opt).from(element).save();
     }
 
-    // Start App
     initSetup();
 </script>
 </body>
