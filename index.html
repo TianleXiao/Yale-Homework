@@ -77,7 +77,6 @@
     const REMOTE_JSON_URL = "https://raw.githubusercontent.com/TianleXiao/Yale-Homework/refs/heads/main/tasks.json";
     let allTasks = [];
 
-    // Master subjects list. Note: "Visual Art" and "Business Management" updated to match common typos in your data
     const masterSubjects = [
         "Chinese A HL", "Chinese A SL", "Math AA HL (Mr. Yu's Class)", 
         "Math AA HL (Mr. Kris Ma's Class)", "Math AA HL (Ms. Li's Class)","Math AA SL", "Math AI SL", 
@@ -85,18 +84,19 @@
         "Economics SL", "Economics HL (Ms. Tina's Class)","Economics HL (Ms. Manjula's Class)",
         "Geography HL", "Geography SL", "Physics HL", 
         "Physics SL", "Chemistry SL", "Chemistry HL (Mr. Gilmore's Class)", "Chemistry HL (Mr. Benedict's Class)",
-        "Visual Art HL", "Vitual Art HL", "Computer Science SL", "Music HL", "Biology HL", "Biology SL","Chinese TOK","English TOK"
+        "Visual Art HL", "Vitual Art HL", "Computer Science SL", "Music HL", "Biology HL", "Biology SL",
+        "Chinese TOK", "English TOK"
     ];
 
     /**
-     * Helper to clean strings for comparison (removes spaces and makes lowercase)
+     * Clean string by removing extra whitespace and converting to lowercase for robust matching
      */
     function normalize(str) {
         return str ? str.replace(/\s+/g, '').toLowerCase() : "";
     }
 
     /**
-     * Fetch latest tasks with cache-busting
+     * Fetch latest tasks from GitHub with cache-busting timestamp
      */
     async function fetchTasks() {
         const statusEl = document.getElementById('sync-status');
@@ -108,6 +108,7 @@
             statusEl.innerText = `Live Sync Active: ${new Date().toLocaleDateString()}`;
             statusEl.style.color = "green";
 
+            // If user has saved preferences, auto-load the list
             const saved = JSON.parse(localStorage.getItem('yale_selected_subjects') || "[]");
             if(saved.length > 0) {
                 generateList(true); 
@@ -119,13 +120,13 @@
     }
 
     /**
-     * Initialize UI and checkboxes
+     * Build the subject checkbox UI
      */
     function initSetup() {
         const container = document.getElementById('subject-options');
         const savedSubjects = JSON.parse(localStorage.getItem('yale_selected_subjects') || "[]");
 
-        // Sort unique subjects
+        // Remove duplicates and sort alphabetically
         [...new Set(masterSubjects)].sort().forEach(sub => {
             const isChecked = savedSubjects.includes(sub) ? 'checked' : '';
             const div = document.createElement('div');
@@ -147,13 +148,16 @@
         fetchTasks();
     }
 
+    /**
+     * Save current selection to browser memory
+     */
     function saveSelection() {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
         localStorage.setItem('yale_selected_subjects', JSON.stringify(selected));
     }
 
     /**
-     * Main rendering function with strict string normalization
+     * Filter tasks based on selection and render the list
      */
     function generateList(isAuto = false) {
         const selected = Array.from(document.querySelectorAll('#subject-options input:checked')).map(i => i.value);
@@ -168,9 +172,9 @@
         const container = document.getElementById('task-container');
         container.innerHTML = '';
 
-        // Normalize both sides to avoid space-related bugs
         const normalizedSelected = selected.map(s => normalize(s));
 
+        // Matching logic: uses the normalized subject name
         const filteredTasks = allTasks.filter(task => {
             return normalizedSelected.includes(normalize(task.subject));
         });
@@ -199,11 +203,17 @@
         document.getElementById('list-stage').style.display = 'block';
     }
 
+    /**
+     * Reset view to configuration stage
+     */
     function goBack() {
         document.getElementById('setup-stage').style.display = 'block';
         document.getElementById('list-stage').style.display = 'none';
     }
 
+    /**
+     * Generate PDF of the current view
+     */
     function downloadPDF() {
         const element = document.getElementById('pdf-content');
         const opt = {
@@ -215,6 +225,7 @@
         html2pdf().set(opt).from(element).save();
     }
 
+    // Initialize application
     initSetup();
 </script>
 </body>
