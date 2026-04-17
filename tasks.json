@@ -2,8 +2,9 @@
   { "subject": "Chinese A HL", "title": "TBD", "due": "TBD" },
   { "subject": "Chinese A HL", "title": "TBD", "due": "TBD" },
   { "subject": "Chinese A SL", "title": "准备IO,并准备与叶老师的谈话", "due": "TBD" },
-  { "subject": "English B SL", "title": "Complete worksheet about Human ingenuity", "due": "TBD" },
-  { "subject": "Biology HL", "title": "Gene Mutation Worksheet", "due": "TBD" },
+  { "subject": "English B SL", "title": "Begin gathering resources for your research. Research resources will be checked next Tuesday.", "due": "April 21 (Tuesday)" },
+  { "subject": "English B SL", "title": "Workbook 137-138", "due": "April 21 (Tuesday)" },
+  { "subject": "Biology HL", "title": "TBD", "due": "TBD" },
   { "subject": "Physics HL", "title": "Physics IA First Draft (SUBMITTED / OVERDUE)", "due": "March 31 (passed)" },
   { "subject": "Chemistry HL (Mr. Gilmore's Class)", "title": "TBD", "due": "TBD" },
   { "subject": "Chemistry HL (Mr. Gilmore's Class)", "title": "Chemistry IA First Draft (SUBMITTED / OVERDUE)", "due": "March 23 (passed)" },
@@ -14,8 +15,6 @@
   { "subject": "Math AA HL (Mr. Yu's Class)", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "April 1 (Passed)" },
   { "subject": "Math AA HL (Mr. Kris Ma's Class)", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "April 1 (Passed)" },
   { "subject": "Math AA HL (Mr. Kris Ma's Class)", "title": "Revision village: Medium: 23, 26 27", "due": "April 13 (Monday) Before 10:00 a.m." },
-  { "subject": "Math AA HL (Ms. Li's Class)", "title": "TBD", "due": "TBD" },
-  { "subject": "Math AA HL (Ms. Li's Class)", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "April 1 (Passed)" },
   { "subject": "Math AA SL", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "Apr 1 (Passed)" },
   { "subject": "Math AI SL", "title": "Math IA First Draft (SUBMITTED / OVERDUE)", "due": "Apr 1 (Passed)" },
   { "subject": "Geography SL", "title": "TBD", "due": "TBD" },
@@ -31,5 +30,5 @@
   { "subject": "Computer Science SL", "title": "TBD", "due": "TBD" },
   { "subject": "Music HL", "title": "TBD", "due": "TBD" },
   { "subject": "Chinese TOK", "title": "TOK Presentation Preparation", "due": "TBD" },
-  { "subject": "English TOK", "title": "TBD", "due": "TBD" }
+  { "subject": "English TOK", "title": "TOK Presentation Preparation", "due": "TBD" }
 ]
