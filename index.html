@@ -174,9 +174,15 @@
 
         const normalizedSelected = selected.map(s => normalize(s));
 
-        // Matching logic: uses the normalized subject name
+        // Filter tasks based on selected subjects and exclude tasks with "TBD" content
         const filteredTasks = allTasks.filter(task => {
-            return normalizedSelected.includes(normalize(task.subject));
+            const isSubjectSelected = normalizedSelected.includes(normalize(task.subject));
+            
+            // Normalize the task title to uppercase and check if it equals "TBD"
+            const isContentTBD = task.title && task.title.trim().toUpperCase() === 'TBD';
+            
+            // Return true only if the subject is selected and the content is not TBD
+            return isSubjectSelected && !isContentTBD;
         });
 
         if(filteredTasks.length === 0) {
